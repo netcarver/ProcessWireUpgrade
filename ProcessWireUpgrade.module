@@ -184,16 +184,28 @@ class ProcessWireUpgrade extends Process {
 			$this->_('Status')
 			));
 
+		$http = new WireHttp();
+		$http->setTimeout(2);
+
 		$items = $this->checker->getVersions(); 
 		if(count($items)) { 
 			foreach($items as $name => $item) {
 				if(empty($item['remote'])) continue; // not in directory
 				$remote = $this->sanitizer->entities($item['remote']);
+                $remUrl = $this->sanitizer->url($item['url']);
 				$upgradeLabel = $this->_('Up-to-date'); 
 
 				if($item['new'] > 0) { 
+                    $remVer = $remote;
 					$upgradeLabel = $this->_('Upgrade available'); 
 					$remote = "<strong>$remote</strong>";
+                    if (!empty($remUrl)) {
+                        $changelogUrl = "$remUrl/releases/tag/$remVer";
+                        $http->get($changelogUrl);
+                        if(200 == $http->getHttpCode()) {
+                            $remote.= " <a href='$changelogUrl'>" . $this->_('Release Notes') . '</a>';
+                        }
+                    }
 				} else if($item['new'] < 0) { 
 					$upgradeLabel .= '+';
 				}

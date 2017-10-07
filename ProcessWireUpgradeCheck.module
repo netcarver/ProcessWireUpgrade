@@ -177,7 +177,8 @@ class ProcessWireUpgradeCheck extends WireData implements Module {
 				'local' => $this->config->version,
 				'remote' => $branch['version'], 
 				'new' => $new,
-				'branch' => $branch['name'], 
+				'branch' => $branch['name'],
+				'url' => '',
 				);
 		}
 
@@ -221,7 +222,7 @@ class ProcessWireUpgradeCheck extends WireData implements Module {
 		$url = 	$this->config->moduleServiceURL . 
 			"?apikey=" . $this->config->moduleServiceKey . 
 			"&limit=100" . 
-			"&field=module_version,version,requires_versions" . 
+			"&field=module_version,version,requires_versions,project_url" .
 			"&class_name=";
 
 		$names = array(); 
@@ -237,7 +238,8 @@ class ProcessWireUpgradeCheck extends WireData implements Module {
 				'local' => $this->modules->formatVersion($info['version']), 
 				'remote' => false, 
 				'new' => 0,
-				'requiresVersions' => $info['requiresVersions']
+				'requiresVersions' => $info['requiresVersions'],
+				'url' => '',
 				);
 		}
 
@@ -263,6 +265,7 @@ class ProcessWireUpgradeCheck extends WireData implements Module {
 		foreach($data['items'] as $item) {
 			$name = $item['class_name'];
 			$versions[$name]['remote'] = $item['module_version'];	
+			$versions[$name]['url'] = $item['project_url'];
 			$new = version_compare($versions[$name]['remote'], $versions[$name]['local']);
 			$versions[$name]['new'] = $new; 
 			if($new <= 0) {
